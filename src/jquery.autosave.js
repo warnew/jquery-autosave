@@ -622,7 +622,60 @@
         url: window.location.href,
         type: "POST"
       }
+    },
+    load: {
+      method: function(options, formData) {
+        var self = this, o = $.extend({}, options);
+
+        // Wrap the complete method with our own
+        o.complete = function(xhr, status) {
+          if ($.isFunction(options.complete)) {
+            options.complete.apply(self, arguments);
+          }
+
+          self.next("save");
+        };
+
+        // Allow for dynamically generated data
+        if ($.isFunction(o.data)) {
+          o.data = o.data.call(self, formData);
+        }
+
+        var formDataType = _type(formData),
+            optionsDataType = _type(o.data);
+
+        // No options data given, use form data
+        if (optionsDataType == "undefined") {
+          o.data = formData;
+
+        // Data types must match in order to merge
+        } else if (formDataType == optionsDataType) {
+          switch(formDataType) {
+            case "array": {
+              o.data = $.merge(formData, o.data);
+            } break;
+            case "object": {
+              o.data = $.extend(formData, o.data);
+            } break;
+            case "string": {
+              o.data = formData + (formData.length ? "&" : "") + o.data;
+            } break;
+          }
+        } else {
+          throw "Cannot merge form data with options data, must be of same type.";
+        }
+
+        $(options.selector).load(options.url, o);
+
+        return false;
+      },
+      options: {
+        selector: '',
+        url: window.location.href,
+        type: "POST"
+      }
     }
+
   });
 
   /**
