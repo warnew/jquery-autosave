@@ -665,13 +665,13 @@
           throw "Cannot merge form data with options data, must be of same type.";
         }
 
-        $(options.selector).load(options.url, o);
+        $(options.selector).load(options.url, o.data);
 
         return false;
       },
       options: {
         selector: '',
-        url: window.location.href,
+        url: window.location.href, 
         type: "POST"
       }
     }
